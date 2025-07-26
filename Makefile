@@ -74,4 +74,4 @@ api-migrate:
 	docker compose exec backend alembic upgrade head
 
 postgres-connect:
-	docker compose exec postgres psql -U postgres -d game_server_new -c "SELECT * FROM alembic_version;"
+	docker compose exec postgres psql -U postgres -d auth_db_3333 -c "SELECT * FROM alembic_version;"
