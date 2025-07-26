@@ -1,8 +1,11 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
 )
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.core.logging import setup_logging
 from app.servers.routes import router as server_router
@@ -23,6 +26,9 @@ app = FastAPI(
     docs_url=None, redoc_url=None, title=title, description=description, version=version
 )
 
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+
 app.include_router(server_router)
 app.include_router(vk_auth_router)
 
@@ -30,6 +36,12 @@ app.include_router(vk_auth_router)
 @app.get("/health", include_in_schema=False)
 async def health_check():
     return JSONResponse(status_code=200, content={"status": "ok"})
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = os.path.join(os.path.dirname(__file__), "static/favicon.ico")
+    return FileResponse(favicon_path)
 
 
 @app.get("/docs", include_in_schema=False)
