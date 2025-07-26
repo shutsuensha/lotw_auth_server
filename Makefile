@@ -56,22 +56,22 @@ database:
 
 
 services-up:
-	docker-compose -f docker-compose-services.yaml up --build -d
+	docker compose -f docker-compose-services.yaml up --build -d
 
 services-down: 
-	docker-compose -f docker-compose-services.yaml down
+	docker compose -f docker-compose-services.yaml down
 
 api-up:
-	docker-compose -f docker-compose.yaml up --build -d
+	docker compose -f docker-compose.yaml up --build -d
 
 api-down:
-	docker-compose -f docker-compose.yaml down
+	docker compose -f docker-compose.yaml down
 
 api:
-	docker-compose -f docker-compose.yaml down && docker-compose -f docker-compose.yaml up --build -d
+	docker compose -f docker-compose.yaml down && docker compose -f docker-compose.yaml up --build -d
 
 api-migrate:
-	docker exec -it backend alembic upgrade head
+	docker compose exec backend alembic upgrade head
 
 postgres-connect:
-	docker exec -it postgres psql -U postgres -d game_server_new -c "SELECT * FROM alembic_version;"
+	docker compose exec postgres psql -U postgres -d game_server_new -c "SELECT * FROM alembic_version;"
