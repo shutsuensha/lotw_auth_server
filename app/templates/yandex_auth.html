@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Yandex Auth Callback</title>
+  </head>
+  <body>
+    <script>
+      const hash = window.location.hash.substring(1); // убираем #
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get("access_token");
+
+      if (accessToken) {
+        // Редирект на backend с токеном в query-параметре
+        window.location.href = `/yandex/auth/token?access_token=${encodeURIComponent(
+          accessToken
+        )}`;
+      } else {
+        console.error("Token not found in URL");
+      }
+    </script>
+  </body>
+</html>

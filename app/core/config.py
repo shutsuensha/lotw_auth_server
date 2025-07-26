@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     VK_CLIENT_ID: int
     VK_REDIRECT_URI: str
 
+    YANDEX_CLIENT_ID: str
+    YANDEX_REDIRECT_URI: str
+
+
     @property
     def POSTGRES_URL_ASYNC(self):
         return f"postgresql+asyncpg://{self.POSTGRES_DB_USER}:{self.POSTGRES_DB_PASS}@{self.POSTGRES_DB_HOST}:{self.POSTGRES_DB_PORT}/{self.POSTGRES_DB_NAME}"

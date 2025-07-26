@@ -8,3 +8,4 @@ pyyaml
 asyncpg
 sqlalchemy
 uvicorn
+jinja2

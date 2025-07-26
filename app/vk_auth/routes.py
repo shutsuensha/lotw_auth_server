@@ -12,7 +12,7 @@ from app.core.config import settings
 
 logger = logging.getLogger()
 
-router = APIRouter(prefix="/vk/auth", tags=["vk-auth"])
+router = APIRouter(prefix="/vk/auth", tags=["vk-auth"], include_in_schema=False)
 
 
 CLIENT_ID = settings.VK_CLIENT_ID
@@ -33,7 +33,7 @@ def generate_code_challenge(verifier: str):
     return base64.urlsafe_b64encode(sha256).rstrip(b"=").decode("ascii")
 
 
-@router.get("/", include_in_schema=False)
+@router.get("/")
 async def vk_auth():
     code_verifier = generate_code_verifier()
     code_challenge = generate_code_challenge(code_verifier)
@@ -58,7 +58,7 @@ async def vk_auth():
     return RedirectResponse(url)
 
 
-@router.get("/callback", include_in_schema=False)
+@router.get("/callback")
 async def vk_callback(request: Request):
     query_params = request.query_params
 
@@ -108,7 +108,6 @@ async def vk_callback(request: Request):
     code_verifiers.pop(state, None)
 
     id_token = token_data["id_token"]
-
 
     data = {
         "client_id": CLIENT_ID,

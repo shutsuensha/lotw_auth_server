@@ -12,3 +12,6 @@ def setup_logging(config_path: str = "logging-config.yaml") -> None:
             logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=logging.INFO)
+
+
+setup_logging()

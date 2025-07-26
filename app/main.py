@@ -7,11 +7,10 @@ from fastapi.openapi.docs import (
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.core.logging import setup_logging
+import app.core.logging  # noqa
 from app.servers.routes import router as server_router
 from app.vk_auth.routes import router as vk_auth_router
-
-setup_logging()
+from app.yandex_auth.routes import router as yandex_auth_router
 
 title = "Auth API"
 version = "1.0.0"
@@ -31,6 +30,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(server_router)
 app.include_router(vk_auth_router)
+app.include_router(yandex_auth_router)
 
 
 @app.get("/health", include_in_schema=False)
