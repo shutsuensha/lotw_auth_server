@@ -1,0 +1,9 @@
+fastapi
+httpx
+alembic
+pydantic
+pydantic-settings
+python-dotenv
+pyyaml
+asyncpg
+sqlalchemy
