@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     POSTGRES_DB_NAME: str
 
     VK_CLIENT_ID: int
+    VK_REDIRECT_URI: str
 
     @property
     def POSTGRES_URL_ASYNC(self):
