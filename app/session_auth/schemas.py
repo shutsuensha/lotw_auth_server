@@ -11,7 +11,6 @@ class TokenOut(BaseModel):
 
 
 class UserPayloadJWT(BaseModel):
-    vk_id: str | None = None
-    yandex_id: str | None = None
+    user_id: int
     possible_username: str | None = None
     possible_avatar: str | None = None

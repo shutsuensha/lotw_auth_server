@@ -8,7 +8,7 @@ class ServerIn(BaseModel):
     name: str
     locale: str
     max_players: int
-    status: str
+    is_active: bool
 
 
 class ServerOut(BaseModel):
@@ -17,7 +17,7 @@ class ServerOut(BaseModel):
     name: str
     locale: str
     max_players: int
-    status: str
+    is_active: bool
     created_at: datetime
 
     class Config:
@@ -29,4 +29,4 @@ class ServerOptionalIn(BaseModel):
     name: str | None = None
     locale: str | None = None
     max_players: int | None = None
-    status: str | None = None
+    is_active: bool | None = None

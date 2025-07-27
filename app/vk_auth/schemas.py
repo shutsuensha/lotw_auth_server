@@ -9,6 +9,7 @@ class VkUserOut(BaseModel):
     phone: str | None = None
     avatar: str | None = None
     email: str | None = None
+    user_id: int
 
     class Config:
         from_attributes = True

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_DB: int
+
     @property
     def POSTGRES_URL_ASYNC(self):
         return f"postgresql+asyncpg://{self.POSTGRES_DB_USER}:{self.POSTGRES_DB_PASS}@{self.POSTGRES_DB_HOST}:{self.POSTGRES_DB_PORT}/{self.POSTGRES_DB_NAME}"

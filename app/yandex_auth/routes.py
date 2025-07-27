@@ -10,6 +10,7 @@ from app.core.deps import db
 from app.core.templating import templates
 from app.core.utils import generate_session_id
 from app.session_auth.models import SessionUser
+from app.users_auth.models import User
 from app.yandex_auth.models import YandexUser
 from app.yandex_auth.schemas import YandexUserIn, YandexUserOut
 
@@ -67,25 +68,48 @@ async def yandex_token(
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
+        user_id = existing_user.user_id
         await db.delete(existing_user)
         await db.flush()
 
-    yandex_user = YandexUser(**yandex_user_in.model_dump())
-    db.add(yandex_user)
-    await db.flush()
+        yandex_user = YandexUser(**yandex_user_in.model_dump(), user_id=user_id)
+        db.add(yandex_user)
+        await db.flush()
 
-    session_user = SessionUser(
-        session_id=generate_session_id(), yandex_user_id=yandex_user.id
-    )
-    db.add(session_user)
+        session_user = SessionUser(
+            session_id=generate_session_id(), yandex_user_id=yandex_user.id
+        )
+        db.add(session_user)
 
-    await db.commit()
+        await db.commit()
 
-    return {
-        "success": True,
-        "message": "New user created",
-        "session_id": session_user.session_id,
-    }
+        return {
+            "success": True,
+            "message": "User recreated",
+            "session_id": session_user.session_id,
+        }
+
+    else:
+        user = User()
+        db.add(user)
+        await db.flush()
+
+        yandex_user = YandexUser(**yandex_user_in.model_dump(), user_id=user.id)
+        db.add(yandex_user)
+        await db.flush()
+
+        session_user = SessionUser(
+            session_id=generate_session_id(), yandex_user_id=yandex_user.id
+        )
+        db.add(session_user)
+
+        await db.commit()
+
+        return {
+            "success": True,
+            "message": "New user created",
+            "session_id": session_user.session_id,
+        }
 
 
 @router.get("/list", response_model=list[YandexUserOut])

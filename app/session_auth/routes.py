@@ -35,7 +35,6 @@ async def generate_jwt_token(session_token: SessionToken, db: db):
 
     if session_user.vk_user_id:
         vk_user = await db.get(VkUser, session_user.vk_user_id)
-        vk_id = vk_user.vk_id
         if vk_user.first_name is not None and vk_user.last_name is not None:
             if vk_user.first_name.strip() or vk_user.last_name.strip():
                 possible_username = f"{vk_user.first_name} {vk_user.last_name}"
@@ -47,14 +46,13 @@ async def generate_jwt_token(session_token: SessionToken, db: db):
             vk_user.avatar if vk_user.avatar and vk_user.avatar.strip() else None
         )
         user_payload = UserPayloadJWT(
-            vk_id=vk_id,
+            user_id=vk_user.user_id,
             possible_username=possible_username,
             possible_avatar=possible_avatar,
         )
 
     if session_user.yandex_user_id:
         yandex_user = await db.get(YandexUser, session_user.yandex_user_id)
-        yandex_id = yandex_user.yandex_id
         possible_username = (
             yandex_user.real_name
             if yandex_user.real_name and yandex_user.real_name.strip()
@@ -66,12 +64,10 @@ async def generate_jwt_token(session_token: SessionToken, db: db):
             else None
         )
         user_payload = UserPayloadJWT(
-            yandex_id=yandex_id,
+            user_id=yandex_user.user_id,
             possible_username=possible_username,
             possible_avatar=possible_avatar,
         )
-    
-    logger.info(user_payload)
 
     access_token = create_access_token(user_payload.model_dump())
 

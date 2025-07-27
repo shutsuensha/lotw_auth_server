@@ -11,8 +11,10 @@ from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.deps import db
+from app.core.redis import redis_client
 from app.core.utils import generate_session_id
 from app.session_auth.models import SessionUser
+from app.users_auth.models import User
 from app.vk_auth.models import VkUser
 from app.vk_auth.schemas import VkUserIn, VkUserOut
 
@@ -23,7 +25,6 @@ router = APIRouter(prefix="/vk/auth", tags=["vk-auth"])
 
 CLIENT_ID = settings.VK_CLIENT_ID
 REDIRECT_URI = settings.VK_REDIRECT_URI
-STATE = "secure_random_state_abc"
 
 code_verifiers = {}
 
@@ -43,15 +44,16 @@ def generate_code_challenge(verifier: str):
 async def vk_auth():
     code_verifier = generate_code_verifier()
     code_challenge = generate_code_challenge(code_verifier)
+    state = secrets.token_urlsafe(16)
 
-    # Сохраняем code_verifier по state
-    code_verifiers[STATE] = code_verifier
+    # Сохраняем code_verifier по state в Redis на 5 минут
+    await redis_client.setex(f"vk:code_verifier:{state}", 300, code_verifier)
 
     params = {
         "response_type": "code",
         "client_id": CLIENT_ID,
         "redirect_uri": REDIRECT_URI,
-        "state": STATE,
+        "state": state,
         "code_challenge": code_challenge,
         "code_challenge_method": "S256",
         "scope": "openid email",
@@ -80,8 +82,8 @@ async def vk_callback(request: Request, db: db):
             status_code=400, detail="Missing 'code' or 'state' in query parameters"
         )
 
-    # Получаем code_verifier по state
-    code_verifier = code_verifiers.get(state)
+    # Получаем code_verifier из Redis
+    code_verifier = await redis_client.get(f"vk:code_verifier:{state}")
     if not code_verifier:
         raise HTTPException(status_code=400, detail="Invalid or expired state")
 
@@ -141,23 +143,48 @@ async def vk_callback(request: Request, db: db):
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
+        user_id = existing_user.user_id
         await db.delete(existing_user)
         await db.flush()
 
-    vk_user = VkUser(**vk_user_in.model_dump())
-    db.add(vk_user)
-    await db.flush()
+        vk_user = VkUser(**vk_user_in.model_dump(), user_id=user_id)
+        db.add(vk_user)
+        await db.flush()
 
-    session_user = SessionUser(session_id=generate_session_id(), vk_user_id=vk_user.id)
-    db.add(session_user)
+        session_user = SessionUser(
+            session_id=generate_session_id(), vk_user_id=vk_user.id
+        )
+        db.add(session_user)
 
-    await db.commit()
+        await db.commit()
 
-    return {
-        "success": True,
-        "message": "New user created",
-        "session_id": session_user.session_id,
-    }
+        return {
+            "success": True,
+            "message": "User recreated",
+            "session_id": session_user.session_id,
+        }
+
+    else:
+        user = User()
+        db.add(user)
+        await db.flush()
+
+        vk_user = VkUser(**vk_user_in.model_dump(), user_id=user.id)
+        db.add(vk_user)
+        await db.flush()
+
+        session_user = SessionUser(
+            session_id=generate_session_id(), vk_user_id=vk_user.id
+        )
+        db.add(session_user)
+
+        await db.commit()
+
+        return {
+            "success": True,
+            "message": "New user created",
+            "session_id": session_user.session_id,
+        }
 
 
 @router.get("/list", response_model=list[VkUserOut])

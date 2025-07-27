@@ -44,6 +44,7 @@ class YandexUserOut(BaseModel):
     is_avatar_empty: bool | None = None
     default_phone: PhoneData | None = None
     psuid: str | None = None
+    user_id: int
 
     class Config:
         from_attributes = True
