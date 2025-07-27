@@ -46,10 +46,6 @@ revision:
 upgrade:
 	uv run alembic upgrade head
 
-# Сделать миграцию и сразу применить: make migrate name=название
-migrate: 
-	revision upgrade
-
 database:
 	psql -U evalshine -d auth_db_3333
 

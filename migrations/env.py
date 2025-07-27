@@ -10,6 +10,9 @@ from alembic import context
 from app.core.config import settings
 from app.core.db import Base
 from app.servers.models import Server
+from app.vk_auth.models import VkUser
+from app.yandex_auth.models import YandexUser
+from app.session_auth.models import SessionUser
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

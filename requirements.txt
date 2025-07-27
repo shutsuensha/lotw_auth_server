@@ -9,3 +9,4 @@ asyncpg
 sqlalchemy
 uvicorn
 jinja2
+python-jose

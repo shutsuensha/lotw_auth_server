@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     YANDEX_CLIENT_ID: str
     YANDEX_REDIRECT_URI: str
 
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     @property
     def POSTGRES_URL_ASYNC(self):

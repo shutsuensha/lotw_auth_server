@@ -1,5 +1,3 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
@@ -9,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 import app.core.logging  # noqa
 from app.servers.routes import router as server_router
+from app.session_auth.routes import router as session_auth_router
 from app.vk_auth.routes import router as vk_auth_router
 from app.yandex_auth.routes import router as yandex_auth_router
 
@@ -25,12 +24,12 @@ app = FastAPI(
     docs_url=None, redoc_url=None, title=title, description=description, version=version
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="app/core/static"), name="static")
 
-
-app.include_router(server_router)
+app.include_router(session_auth_router)
 app.include_router(vk_auth_router)
 app.include_router(yandex_auth_router)
+app.include_router(server_router)
 
 
 @app.get("/health", include_in_schema=False)
@@ -40,7 +39,7 @@ async def health_check():
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    favicon_path = os.path.join(os.path.dirname(__file__), "static/favicon.ico")
+    favicon_path = "app/core/static/favicon.ico"
     return FileResponse(favicon_path)
 
 

@@ -18,7 +18,7 @@ indent-style = "space"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "UP", "PL", "C", "Q", "T", "S"]
-ignore = ["F841", "E501", "E402"]
+ignore = ["F841", "E501", "E402", "S106"]
 
 [tool.mypy]
 python_version = "3.13"

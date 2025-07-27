@@ -7,12 +7,18 @@ from urllib.parse import urlencode
 import httpx
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy import select
 
 from app.core.config import settings
+from app.core.deps import db
+from app.core.utils import generate_session_id
+from app.session_auth.models import SessionUser
+from app.vk_auth.models import VkUser
+from app.vk_auth.schemas import VkUserIn, VkUserOut
 
 logger = logging.getLogger()
 
-router = APIRouter(prefix="/vk/auth", tags=["vk-auth"], include_in_schema=False)
+router = APIRouter(prefix="/vk/auth", tags=["vk-auth"])
 
 
 CLIENT_ID = settings.VK_CLIENT_ID
@@ -33,7 +39,7 @@ def generate_code_challenge(verifier: str):
     return base64.urlsafe_b64encode(sha256).rstrip(b"=").decode("ascii")
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
 async def vk_auth():
     code_verifier = generate_code_verifier()
     code_challenge = generate_code_challenge(code_verifier)
@@ -58,8 +64,8 @@ async def vk_auth():
     return RedirectResponse(url)
 
 
-@router.get("/callback")
-async def vk_callback(request: Request):
+@router.get("/callback", include_in_schema=False)
+async def vk_callback(request: Request, db: db):
     query_params = request.query_params
 
     code = query_params.get("code")
@@ -126,4 +132,54 @@ async def vk_callback(request: Request):
             status_code=resp.status_code, detail=f"VK API error: {resp.text}"
         )
 
-    return JSONResponse(content=resp.json())
+    data = resp.json()
+
+    vk_user_in = VkUserIn(**data["user"])
+
+    stmt = select(VkUser).where(VkUser.vk_id == vk_user_in.vk_id)
+    result = await db.execute(stmt)
+    existing_user = result.scalar_one_or_none()
+
+    if existing_user:
+        await db.delete(existing_user)
+        await db.flush()
+
+    vk_user = VkUser(**vk_user_in.model_dump())
+    db.add(vk_user)
+    await db.flush()
+
+    session_user = SessionUser(session_id=generate_session_id(), vk_user_id=vk_user.id)
+    db.add(session_user)
+
+    await db.commit()
+
+    return {
+        "success": True,
+        "message": "New user created",
+        "session_id": session_user.session_id,
+    }
+
+
+@router.get("/list", response_model=list[VkUserOut])
+async def list_vk_users(db: db):
+    result = await db.execute(select(VkUser))
+    return result.scalars().all()
+
+
+@router.get("/{vk_user_id}", response_model=VkUserOut)
+async def get_vk_user(vk_user_id: int, db: db):
+    result = await db.get(VkUser, vk_user_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="vk_user_id not found")
+    return result
+
+
+@router.delete("/{vk_user_id}")
+async def delete_vk_user(vk_user_id: int, db: db):
+    server = await db.get(VkUser, vk_user_id)
+    if not server:
+        raise HTTPException(status_code=404, detail="vk_user_id not found")
+
+    await db.delete(server)
+    await db.commit()
+    return {"Deleted": True}
