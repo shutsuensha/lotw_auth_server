@@ -45,4 +45,4 @@ api-migrate:
 	docker compose exec backend alembic upgrade head
 
 postgres-connect:
-	docker compose exec postgres psql -U evalshine -d auth_db_3333 -c "SELECT * FROM alembic_version;"
+	docker compose exec postgres psql -U evalshine -d mydatabase33341 -c "SELECT * FROM alembic_version;"
