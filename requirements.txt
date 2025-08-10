@@ -12,3 +12,4 @@ python-jose
 redis
 ruff
 rich
+pyyaml
