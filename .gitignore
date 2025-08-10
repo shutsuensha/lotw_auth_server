@@ -4,4 +4,3 @@ __pycache__
 NOTES.md
 .vscode
 .ruff_cache
-.mypy_cache

@@ -4,10 +4,11 @@ alembic
 pydantic
 pydantic-settings
 python-dotenv
-pyyaml
 asyncpg
 sqlalchemy
 uvicorn
 jinja2
 python-jose
 redis
+ruff
+rich

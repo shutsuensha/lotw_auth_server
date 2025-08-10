@@ -13,15 +13,10 @@ from app.yandex_auth.routes import router as yandex_auth_router
 
 title = "Auth API"
 version = "1.0.0"
-description = """
-:3
-#### 📝 Author:
-- 🐰 **Daniil Kupryianchyk**
-"""
 
 
 app = FastAPI(
-    docs_url=None, redoc_url=None, title=title, description=description, version=version
+    docs_url=None, redoc_url=None, title=title, description=None, version=version
 )
 
 app.mount("/static", StaticFiles(directory="app/core/static"), name="static")

@@ -1,5 +1,0 @@
-ruff
-mypy
-bandit
-safety
-pip-audit

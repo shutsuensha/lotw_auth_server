@@ -1,8 +1,8 @@
 [project]
-name = "lotw-auth-server"
+name = ""
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = ""
+readme = ""
 requires-python = ">=3.13"
 dependencies = []
 
@@ -10,7 +10,7 @@ dependencies = []
 line-length = 88
 target-version = "py313"
 src = ["app"]
-exclude = ["migrations", "__pycache__"]
+exclude = ["__pycache__"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -18,9 +18,4 @@ indent-style = "space"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "UP", "PL", "C", "Q", "T", "S"]
-ignore = ["F841", "E501", "E402", "S106"]
-
-[tool.mypy]
-python_version = "3.13"
-strict = true
-exclude = ["migrations", "tests", "__pycache__"]
+ignore = ["F841", "E501", "E402", "S106", "PLR0915"]
